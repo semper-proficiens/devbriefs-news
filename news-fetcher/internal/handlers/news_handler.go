@@ -15,10 +15,9 @@ func NewNewsHandler(newsService *service.NewsService) *NewsHandler {
 }
 
 func (h *NewsHandler) GetNews(w http.ResponseWriter, r *http.Request) {
-	category := r.URL.Query().Get("category")
 	keyword := r.URL.Query().Get("keyword")
 
-	news, err := h.newsService.FetchNews(category, keyword)
+	news, err := h.newsService.FetchNews(keyword)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

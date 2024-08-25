@@ -16,6 +16,6 @@ func NewNewsService(cfg *config.Config) *NewsService {
 	}
 }
 
-func (s *NewsService) FetchNews(category, keyword string) ([]models.NewsArticle, error) {
-	return s.newsAPI.FetchNews(category, keyword)
+func (s *NewsService) FetchNews(keyword string) ([]models.NewsArticleTopHeadlines, error) {
+	return s.newsAPI.FetchTopHeadlinesNews(keyword)
 }

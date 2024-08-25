@@ -32,3 +32,36 @@ service components.
 - e.g. For example, deciding which news articles to fetch based on user input and ensuring all rules are followed
 
 In our implementation that's the `internal/service` components.
+
+# Testing
+
+## Local simple test
+
+We can run our service locally like this:
+```go
+NEWSFETCHER_GOOGLE_API_KEY=$apiKey go run cmd/news-fetcher/main.go
+```
+
+We can query the NewsAPI directly in simple curl like this:
+
+Using `everything` endpoint:
+```bash
+curl https://newsapi.org/v2/everything -G \
+    -d q=Apple \
+    -d from=2024-08-25 \  
+    -d sortBy=popularity \
+    -d apiKey=$apiKey
+```
+
+Using `top-headlines` endpoint:
+```bash
+curl https://newsapi.org/v2/top-headlines -G \
+    -d q=Apple \
+    -d country=us -d category=technology \
+    -d apiKey=$apiKey
+```
+
+Using our local api endpoint:
+```bash
+ curl -X GET "http://localhost:8080/api/news?keyword=AI"
+```
