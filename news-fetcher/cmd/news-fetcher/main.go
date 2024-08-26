@@ -25,7 +25,8 @@ func main() {
 
 	// Set up router
 	r := mux.NewRouter()
-	r.HandleFunc("/api/news", newsHandler.GetNews).Methods("GET")
+	r.HandleFunc("/api/top-headlines-news", newsHandler.GetTopHeadlinesNews).Methods("GET")
+	r.HandleFunc("/api/everything-hacking-news", newsHandler.GetEverythingHackingNews).Methods("GET")
 
 	// Start server
 	log.Println("Starting server on :8080")
