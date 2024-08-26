@@ -28,7 +28,9 @@ const (
 	newsExcludedDomains = `
 	daemonology.net
 	`
-	newsSortBy   = "popularity" // options: "relevancy" to q, "publishedAt" for newest (default)
+	//only root domains, not fqdn (e.g. talosintelligence.com vs blog.talosintelligence.com)
+	newsDomains  = "thehackernews.com,hackread.com,talosintelligence.com,bleepingcomputer.com,cisa.gov,csoonline.com,threatpost.com,krebsonsecurity.com,wired.com,zdnet.com,virtualattacks.com"
+	newsSortBy   = "publishedAt" // options: "relevancy" to q, "publishedAt" for newest (default)
 	newsPageSize = "10"
 )
 
@@ -44,7 +46,7 @@ func (api *GoogleNewsAPI) FetchTopHeadlinesNews(keyword string) ([]models.NewsAr
 	// hardcoding 'technology' because that's our main interest
 	// we're using the 'top-headlines' path instead of 'everything' because it allows us to query further by country, category, etc.
 	// news are sort by 'earliest date' from the api using above path
-	// // https://newsapi.org/docs/endpoints/everything
+	// Official doc https://newsapi.org/docs/endpoints/everything
 	topHeadlinesUrl := fmt.Sprintf("https://newsapi.org/v2/top-headlines?country=us&category=technology&q=%s&apiKey=%s", keyword, api.APIKey)
 	resp, err := utils.MakeSecureHTTPRequest(http.MethodGet, topHeadlinesUrl, nil)
 	if err != nil {
@@ -78,15 +80,15 @@ func (api *GoogleNewsAPI) FetchEverythingHacking() ([]models.NewsArticle, error)
 
 // fetchEverythingNews is the signature function used to hit the News API 'everything' endpoint. It expects
 // an argument with the query keywords to use.
+// Official doc https://newsapi.org/docs/endpoints/everything
 func (api *GoogleNewsAPI) fetchEverythingNews(query string) ([]models.NewsArticle, error) {
-	// https://newsapi.org/docs/endpoints/everything
 	encodedQuery := url.QueryEscape(query)
 	// Check the length of the encoded query, max supported by api is 500 chars
 	if len(encodedQuery) > 500 {
 		return nil, fmt.Errorf("encoded query exceeds the maximum length of 500 characters")
 	}
 
-	baseURL, err := url.Parse("https://newsapi.org/v2/everything")
+	baseURL, err := url.Parse(fmt.Sprintf("https://newsapi.org/v2/everything"))
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse base URL: %v", err)
 	}
@@ -102,6 +104,7 @@ func (api *GoogleNewsAPI) fetchEverythingNews(query string) ([]models.NewsArticl
 	params.Add("excludeDomains", newsExcludedDomains)
 	params.Add("language", newsLanguage)
 	params.Add("sortBy", newsSortBy)
+	params.Add("domains", newsDomains)
 	params.Add("pageSize", newsPageSize)
 	params.Add("from", fromDate)
 	params.Add("to", toDate)
@@ -131,9 +134,31 @@ func (api *GoogleNewsAPI) fetchEverythingNews(query string) ([]models.NewsArticl
 		return nil, err
 	}
 
-	for _, article := range result.Articles {
-		log.Printf("Title: %s, Source: %s, URL: %s", article.Title, article.Source, article.URL)
+	uniqueArticles := removeDuplicateTitles(result.Articles, 0.6)
+
+	for _, ua := range uniqueArticles {
+		log.Printf("Title: %s, URL: %s, Date: %s", ua.Title, ua.URL, ua.PublishedAt)
 	}
 
-	return result.Articles, nil
+	return uniqueArticles, nil
+}
+
+// removeDuplicateTitles removes duplicate titles based on a similarity threshold.
+func removeDuplicateTitles(articles []models.NewsArticle, threshold float64) []models.NewsArticle {
+	var uniqueArticles []models.NewsArticle
+	for i, article := range articles {
+		isDuplicate := false
+		for j := 0; j < i; j++ {
+			similarity := utils.CalculateSimilarity(article.Title, articles[j].Title)
+			if similarity >= threshold {
+				log.Printf("Excluded potential duplicate news \"%s\" and \"%s\" with similarity score %2f", article.Title, articles[j].Title, similarity)
+				isDuplicate = true
+				break
+			}
+		}
+		if !isDuplicate {
+			uniqueArticles = append(uniqueArticles, article)
+		}
+	}
+	return uniqueArticles
 }

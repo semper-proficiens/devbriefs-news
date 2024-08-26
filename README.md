@@ -68,7 +68,6 @@ Using our local api endpoint for everything news:
 
 # TOIL
 
-- Add a similarity score based on news title to avoid duplicates
 - Grab `companies` or `domains` of interest from the request query to this api, and construct another hacking news function
 targeting those only
 - Add unit, integration and load test
@@ -76,5 +75,6 @@ targeting those only
 - Add automatic linters in CI
 - Setup for quality scores, code smells, etc
 - Explore other protocols like gRPC
+- Store news in backend and add caching for it
 
 
