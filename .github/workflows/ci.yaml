@@ -26,7 +26,7 @@ jobs:
         run: |
           cd news-fetcher && \
           go test -coverprofile=coverage.out ./... && \
-          go test -bench . -benchmem ./... && \
+          go test -bench . -benchmem ./... -cover && \
           go tool cover -html=coverage.out -o coverage.html
 
       - name: Upload coverage HTML report
