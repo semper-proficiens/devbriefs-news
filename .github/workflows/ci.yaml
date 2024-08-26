@@ -23,10 +23,13 @@ jobs:
 
       - name: Run tests, benchmarks, and generate coverage report
         run: |
-          cd news-fetcher && go test -bench . -benchmem ./... -coverprofile=coverage.out && go tool cover -html=coverage.out -o coverage.html
+          cd news-fetcher
+          go test -coverprofile=coverage.out ./...
+          go test -bench . -benchmem ./...
+          go tool cover -html=coverage.out -o coverage.html
 
       - name: Upload coverage HTML report
         uses: actions/upload-artifact@v2
         with:
           name: coverage-html-report
-          path: coverage.html
+          path: news-fetcher/coverage.html
