@@ -28,6 +28,8 @@ const (
 	newsExcludedDomains = `
 	daemonology.net
 	`
+	newsSortBy   = "popularity" // options: "relevancy" to q, "publishedAt" for newest (default)
+	newsPageSize = "10"
 )
 
 type GoogleNewsAPI struct {
@@ -99,6 +101,8 @@ func (api *GoogleNewsAPI) fetchEverythingNews(query string) ([]models.NewsArticl
 	params.Add("searchin", "title")
 	params.Add("excludeDomains", newsExcludedDomains)
 	params.Add("language", newsLanguage)
+	params.Add("sortBy", newsSortBy)
+	params.Add("pageSize", newsPageSize)
 	params.Add("from", fromDate)
 	params.Add("to", toDate)
 	params.Add("apiKey", api.APIKey)

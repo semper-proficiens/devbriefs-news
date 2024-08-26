@@ -61,7 +61,7 @@ curl https://newsapi.org/v2/top-headlines -G \
     -d apiKey=$apiKey
 ```
 
-Using our local api endpoint:
+Using our local api endpoint for everything news:
 ```bash
  curl -X GET "http://localhost:8080/api/everything-hacking-news"
 ```
