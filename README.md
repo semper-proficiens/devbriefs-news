@@ -63,5 +63,13 @@ curl https://newsapi.org/v2/top-headlines -G \
 
 Using our local api endpoint:
 ```bash
- curl -X GET "http://localhost:8080/api/news?keyword=AI"
+ curl -X GET "http://localhost:8080/api/everything-hacking-news"
 ```
+
+# TOIL
+
+- Add a similarity score based on news title to avoid duplicates
+- Grab `companies` or `domains` of interest from the request query to this api, and construct another hacking news function
+targeting those only
+
+

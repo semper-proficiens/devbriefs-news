@@ -8,10 +8,26 @@ import (
 	"net/url"
 	"news-fetcher/internal/models"
 	"news-fetcher/internal/utils"
+	"time"
 )
 
 const (
-	hackingQuery = "`data breach OR hack`"
+	hackingQuery = `
+	"data breach" OR 
+	"hacker" OR 
+	"hackers" OR 
+	"hacked" OR 
+	"malware" OR 
+	"exploited vulnerability"
+	-"how to"
+	-"your"
+	-"you"
+	-"my"
+	`
+	newsLanguage        = "en"
+	newsExcludedDomains = `
+	daemonology.net
+	`
 )
 
 type GoogleNewsAPI struct {
@@ -68,13 +84,29 @@ func (api *GoogleNewsAPI) fetchEverythingNews(query string) ([]models.NewsArticl
 		return nil, fmt.Errorf("encoded query exceeds the maximum length of 500 characters")
 	}
 
-	// set date range
-	//fromDate := time.Now().AddDate(0, 0, -15)
-	//toDate := time.Now().Date()
+	baseURL, err := url.Parse("https://newsapi.org/v2/everything")
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse base URL: %v", err)
+	}
 
-	everythingUrl := fmt.Sprintf("https://newsapi.org/v2/everything?q=%s&apiKey=%s", encodedQuery, api.APIKey)
-	log.Printf("Request everything url: %s", everythingUrl)
-	resp, err := utils.MakeSecureHTTPRequest(http.MethodGet, everythingUrl, nil)
+	// get news from 1 week ago
+	fromDate := time.Now().AddDate(0, 0, -7).Format("2006-01-02")
+	toDate := time.Now().Format("2006-01-02")
+
+	// query object
+	params := url.Values{}
+	params.Add("q", hackingQuery)
+	params.Add("searchin", "title")
+	params.Add("excludeDomains", newsExcludedDomains)
+	params.Add("language", newsLanguage)
+	params.Add("from", fromDate)
+	params.Add("to", toDate)
+	params.Add("apiKey", api.APIKey)
+
+	// Add the query parameters to the URL
+	baseURL.RawQuery = params.Encode()
+
+	resp, err := utils.MakeSecureHTTPRequest(http.MethodGet, baseURL.String(), nil)
 	if err != nil {
 		log.Printf("Error making http get request: %s", err)
 		return nil, err
@@ -95,7 +127,9 @@ func (api *GoogleNewsAPI) fetchEverythingNews(query string) ([]models.NewsArticl
 		return nil, err
 	}
 
-	log.Printf("Article Response: %s", result.Articles)
+	for _, article := range result.Articles {
+		log.Printf("Title: %s, Source: %s, URL: %s", article.Title, article.Source, article.URL)
+	}
 
 	return result.Articles, nil
 }
