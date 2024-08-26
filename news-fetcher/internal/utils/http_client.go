@@ -4,7 +4,6 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 	"time"
@@ -52,14 +51,14 @@ func NewSecureHTTPClient() *http.Client {
 	}
 }
 
-// MakeSecureHTTPRequest is a utility function for making secure HTTP requests.
+// MakeSecureGetHTTPRequest is a utility function for making secure HTTP requests.
 // It takes the HTTP method, URL, and request body as parameters and returns the HTTP response.
-func MakeSecureHTTPRequest(method, url string, body io.Reader) (*http.Response, error) {
+func MakeSecureGetHTTPRequest(url string) (*http.Response, error) {
 	// Create a new secure HTTP client
 	client := NewSecureHTTPClient()
 
 	// Create a new HTTP request
-	req, err := http.NewRequest(method, url, body)
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		log.Printf("Error creating new http request: %s", err)
 		return nil, err

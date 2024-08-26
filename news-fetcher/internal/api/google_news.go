@@ -35,11 +35,15 @@ const (
 )
 
 type GoogleNewsAPI struct {
-	APIKey string
+	APIKey         string
+	GetHTTPRequest func(url string) (*http.Response, error)
 }
 
 func NewGoogleNewsAPI(apiKey string) *GoogleNewsAPI {
-	return &GoogleNewsAPI{APIKey: apiKey}
+	return &GoogleNewsAPI{
+		APIKey:         apiKey,
+		GetHTTPRequest: utils.MakeSecureGetHTTPRequest,
+	}
 }
 
 func (api *GoogleNewsAPI) FetchTopHeadlinesNews(keyword string) ([]models.NewsArticle, error) {
@@ -48,7 +52,7 @@ func (api *GoogleNewsAPI) FetchTopHeadlinesNews(keyword string) ([]models.NewsAr
 	// news are sort by 'earliest date' from the api using above path
 	// Official doc https://newsapi.org/docs/endpoints/everything
 	topHeadlinesUrl := fmt.Sprintf("https://newsapi.org/v2/top-headlines?country=us&category=technology&q=%s&apiKey=%s", keyword, api.APIKey)
-	resp, err := utils.MakeSecureHTTPRequest(http.MethodGet, topHeadlinesUrl, nil)
+	resp, err := api.GetHTTPRequest(topHeadlinesUrl)
 	if err != nil {
 		log.Printf("Error making http get request: %s", err)
 		return nil, err
@@ -68,7 +72,7 @@ func (api *GoogleNewsAPI) FetchTopHeadlinesNews(keyword string) ([]models.NewsAr
 		return nil, err
 	}
 
-	log.Printf("Article Response: %s", result.Articles)
+	//log.Printf("Article Response: %s", result.Articles)
 
 	return result.Articles, nil
 }
@@ -113,7 +117,7 @@ func (api *GoogleNewsAPI) fetchEverythingNews(query string) ([]models.NewsArticl
 	// Add the query parameters to the URL
 	baseURL.RawQuery = params.Encode()
 
-	resp, err := utils.MakeSecureHTTPRequest(http.MethodGet, baseURL.String(), nil)
+	resp, err := api.GetHTTPRequest(baseURL.String())
 	if err != nil {
 		log.Printf("Error making http get request: %s", err)
 		return nil, err
@@ -136,9 +140,9 @@ func (api *GoogleNewsAPI) fetchEverythingNews(query string) ([]models.NewsArticl
 
 	uniqueArticles := removeDuplicateTitles(result.Articles, 0.6)
 
-	for _, ua := range uniqueArticles {
-		log.Printf("Title: %s, URL: %s, Date: %s", ua.Title, ua.URL, ua.PublishedAt)
-	}
+	//for _, ua := range uniqueArticles {
+	//	log.Printf("Title: %s, URL: %s, Date: %s", ua.Title, ua.URL, ua.PublishedAt)
+	//}
 
 	return uniqueArticles, nil
 }

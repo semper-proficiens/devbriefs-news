@@ -66,6 +66,12 @@ Using our local api endpoint for everything news:
  curl -X GET "http://localhost:8080/api/everything-hacking-news"
 ```
 
+## Go Tests
+
+```bash
+ make go_tests
+```
+
 # TOIL
 
 - Grab `companies` or `domains` of interest from the request query to this api, and construct another hacking news function
