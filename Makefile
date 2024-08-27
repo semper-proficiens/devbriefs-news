@@ -4,6 +4,7 @@ help:
 
 go_tests: ## runs all tests and benchmarks with coverage
 	go test -bench . -benchmem ./... -coverprofile=coverage.out && go tool cover -html=coverage.out -o coverage.html
+	go vet ./...
 
 golangci_run: ## runs golangci-lint
 	golangci-lint run
