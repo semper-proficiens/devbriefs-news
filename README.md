@@ -68,12 +68,10 @@ Using our local api endpoint for everything news:
 
 ## Go Tests and Lints
 
-To run local go test, with benchmarks and coverage:
+To run local go tests, with benchmarks, coverage, lints, vets, and gosec:
 ```bash
  make go_tests
 ```
-
-To run `golangci-lint`:
 
 1. Install golangci-lint https://golangci-lint.run/welcome/install/#local-installation
 2. Run make command:
