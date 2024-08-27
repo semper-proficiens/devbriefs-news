@@ -1,4 +1,4 @@
-module news-fetcher
+module devbriefs-news
 
 go 1.21.9
 

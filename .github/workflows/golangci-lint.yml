@@ -18,7 +18,6 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: ./news-fetcher
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -29,4 +28,3 @@ jobs:
         uses: golangci/golangci-lint-action@v6
         with:
           version: v1.60
-          args: --path-prefix ./news-fetcher

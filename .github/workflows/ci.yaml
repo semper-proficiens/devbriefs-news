@@ -20,11 +20,9 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: '1.21.9'
-          cache-dependency-path: news-fetcher/go.sum
 
       - name: Run tests, benchmarks, and generate coverage report
         run: |
-          cd news-fetcher && \
           go test -coverprofile=coverage.out ./... && \
           go test -bench . -benchmem ./... -cover && \
           go tool cover -html=coverage.out -o coverage.html
@@ -33,4 +31,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: coverage-html-report
-          path: news-fetcher/coverage.html
+          path: coverage.html

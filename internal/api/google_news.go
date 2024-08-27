@@ -1,13 +1,13 @@
 package api
 
 import (
+	"devbriefs-news/internal/models"
+	"devbriefs-news/internal/utils"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"net/url"
-	"news-fetcher/internal/models"
-	"news-fetcher/internal/utils"
 	"time"
 )
 

@@ -1,9 +1,9 @@
 package handlers
 
 import (
+	"devbriefs-news/internal/service"
 	"encoding/json"
 	"net/http"
-	"news-fetcher/internal/service"
 )
 
 type NewsHandler struct {

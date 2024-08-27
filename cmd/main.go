@@ -1,11 +1,11 @@
 package main
 
 import (
+	"devbriefs-news/internal/config"
+	"devbriefs-news/internal/handlers"
+	"devbriefs-news/internal/service"
 	"log"
 	"net/http"
-	"news-fetcher/internal/config"
-	"news-fetcher/internal/handlers"
-	"news-fetcher/internal/service"
 
 	"github.com/gorilla/mux"
 )

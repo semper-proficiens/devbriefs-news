@@ -1,9 +1,9 @@
 package service
 
 import (
-	"news-fetcher/internal/api"
-	"news-fetcher/internal/config"
-	"news-fetcher/internal/models"
+	"devbriefs-news/internal/api"
+	"devbriefs-news/internal/config"
+	"devbriefs-news/internal/models"
 )
 
 type NewsService struct {
