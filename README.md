@@ -12,6 +12,8 @@ Workflow:
 - `service`: business logic
 - `utils`: any tools we develop to help our components
 
+It uses the `gin` web framework.
+
 ## Design Principles
 
 ### Repository Pattern
