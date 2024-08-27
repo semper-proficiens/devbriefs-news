@@ -1,4 +1,4 @@
-name: "staticcheck"
+name: "Staticcheck"
 on:
   push:
     branches:
