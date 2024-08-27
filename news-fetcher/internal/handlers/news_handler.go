@@ -24,7 +24,10 @@ func (h *NewsHandler) GetTopHeadlinesNews(w http.ResponseWriter, r *http.Request
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(news)
+	err = json.NewEncoder(w).Encode(news)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }
 
 func (h *NewsHandler) GetEverythingHackingNews(w http.ResponseWriter, r *http.Request) {
@@ -35,5 +38,8 @@ func (h *NewsHandler) GetEverythingHackingNews(w http.ResponseWriter, r *http.Re
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(news)
+	err = json.NewEncoder(w).Encode(news)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }

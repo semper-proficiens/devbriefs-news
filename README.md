@@ -66,11 +66,21 @@ Using our local api endpoint for everything news:
  curl -X GET "http://localhost:8080/api/everything-hacking-news"
 ```
 
-## Go Tests
+## Go Tests and Lints
 
+To run local go test, with benchmarks and coverage:
 ```bash
  make go_tests
 ```
+
+To run `golangci-lint`:
+
+1. Install golangci-lint https://golangci-lint.run/welcome/install/#local-installation
+2. Run make command:
+    ```bash
+    make golangci_run
+    ```
+
 
 # TOIL
 

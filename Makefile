@@ -4,3 +4,6 @@ help:
 
 go_tests: ## runs all tests and benchmarks with coverage
 	@cd news-fetcher && go test -bench . -benchmem ./... -coverprofile=coverage.out && go tool cover -html=coverage.out -o coverage.html
+
+golangci_run: ## runs golangci-lint
+	@cd news-fetcher && golangci-lint run

@@ -92,7 +92,7 @@ func (api *GoogleNewsAPI) fetchEverythingNews(query string) ([]models.NewsArticl
 		return nil, fmt.Errorf("encoded query exceeds the maximum length of 500 characters")
 	}
 
-	baseURL, err := url.Parse(fmt.Sprintf("https://newsapi.org/v2/everything"))
+	baseURL, err := url.Parse("https://newsapi.org/v2/everything")
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse base URL: %v", err)
 	}
