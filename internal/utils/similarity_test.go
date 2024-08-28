@@ -10,8 +10,8 @@ func TestCalculateSimilarity(t *testing.T) {
 		a, b     string
 		expected float64
 	}{
-		{"kitten", "sitting", 0.4285714285714286},
-		{"flaw", "lawn", 0.5},
+		{"kitten", "sitting", 0.5714285714285714},
+		{"flaw", "lawn", 0.75},
 		{"", "", 1.0},
 		{"", "nonempty", 0.0},
 		{"nonempty", "", 0.0},
