@@ -3,7 +3,7 @@ Devbriefs microservice about news
 
 [//]: # (<img align="right" width="159px" src="https://raw.githubusercontent.com/gin-gonic/logo/master/color.png">)
 
-[//]: # ([![Build Status]&#40;https://github.com/gin-gonic/gin/workflows/Run%20Tests/badge.svg?branch=master&#41;]&#40;https://github.com/semper-proficiens/devbriefs-news/actions?query=branch%3Amain+&#41;)
+[![Build Status](https://github.com/semper-proficiens/devbriefs-news/actions/workflows/gotests.yml/badge.svg)](https://github.com/semper-proficiens/devbriefs-news/actions?query=branch%3Amain+)
 
 [//]: # ([![codecov]&#40;https://codecov.io/gh/gin-gonic/gin/branch/master/graph/badge.svg&#41;]&#40;https://codecov.io/gh/gin-gonic/gin&#41;)
 
