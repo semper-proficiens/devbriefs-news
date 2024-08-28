@@ -81,3 +81,4 @@ jobs:
         with:
           name: codecov-devbriefs-news
           flags: unittests
+          token: ${{ secrets.CODECOV_TOKEN }}
