@@ -73,7 +73,11 @@ jobs:
           go-version: '1.21.9'
       - name: Run tests, benchmarks, vet, and coverage report
         run: |
-          go test -coverprofile=coverage.out ./... && \
-          go test -bench . -benchmem ./... -cover && \
-          go tool cover -html=coverage.out -o coverage.html && \
+          go test -cover -coverprofile=coverage.out ./... && \
+          go test -cover -bench . -benchmem ./... && \
           go vet ./...
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          name: codecov-devbriefs-news
+          flags: unittests
