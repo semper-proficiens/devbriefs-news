@@ -4,8 +4,7 @@ Devbriefs microservice about news
 [//]: # (<img align="right" width="159px" src="https://raw.githubusercontent.com/gin-gonic/logo/master/color.png">)
 
 [![Build Status](https://github.com/semper-proficiens/devbriefs-news/actions/workflows/gotests.yml/badge.svg)](https://github.com/semper-proficiens/devbriefs-news/actions?query=branch%3Amain+)
-
-[//]: # ([![codecov]&#40;https://codecov.io/gh/gin-gonic/gin/branch/master/graph/badge.svg&#41;]&#40;https://codecov.io/gh/gin-gonic/gin&#41;)
+[![codecov](https://codecov.io/github/semper-proficiens/devbriefs-news/branch/main/graph/badge.svg?token=75SCUZRRIP)](https://codecov.io/github/semper-proficiens/devbriefs-news)
 
 [//]: # ([![Go Report Card]&#40;https://goreportcard.com/badge/github.com/gin-gonic/gin&#41;]&#40;https://goreportcard.com/report/github.com/gin-gonic/gin&#41;)
 

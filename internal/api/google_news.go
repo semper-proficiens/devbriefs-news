@@ -59,7 +59,6 @@ func (api *GoogleNewsAPI) FetchTopHeadlinesNews(keyword string) ([]models.NewsAr
 	}
 	defer func() {
 		if err = resp.Body.Close(); err != nil {
-			// Handle the error if needed, for example, log it
 			log.Printf("failed to close response body: %v", err)
 		}
 	}()
@@ -67,7 +66,7 @@ func (api *GoogleNewsAPI) FetchTopHeadlinesNews(keyword string) ([]models.NewsAr
 	var result struct {
 		Articles []models.NewsArticle `json:"articles"`
 	}
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+	if err = json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		log.Printf("Error decoding json: %s", err)
 		return nil, err
 	}

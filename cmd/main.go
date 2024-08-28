@@ -10,6 +10,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const cloudFlareAPI = "https://api.cloudflare.com/client/v4"
+
 func main() {
 	// Load configuration
 	cfg, err := config.LoadConfig()
@@ -18,7 +20,7 @@ func main() {
 	}
 
 	// Fetch Cloudflare IP ranges once during startup
-	trustedProxies, err := utils.FetchCloudflareIPv4Ranges()
+	trustedProxies, err := utils.FetchCloudflareIPv4Ranges(cloudFlareAPI)
 	if err != nil {
 		log.Fatalf("Failed to fetch Cloudflare IP ranges: %v", err)
 	}

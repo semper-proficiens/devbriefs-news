@@ -17,8 +17,11 @@ type CloudflareIPRanges struct {
 }
 
 // FetchCloudflareIPv4Ranges fetches the Cloudflare IP ranges from the Cloudflare API
-func FetchCloudflareIPv4Ranges() ([]string, error) {
-	resp, err := MakeSecureGetHTTPRequest("https://api.cloudflare.com/client/v4/ips")
+func FetchCloudflareIPv4Ranges(url string) ([]string, error) {
+	if url == "" {
+		return nil, fmt.Errorf("url is empty")
+	}
+	resp, err := MakeSecureGetHTTPRequest(url)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch Cloudflare IP ranges: %v", err)
 	}
