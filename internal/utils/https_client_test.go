@@ -45,7 +45,9 @@ func TestMakeSecureGetHTTPRequest(t *testing.T) {
 	// Create a test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"message": "success"}`))
+		if _, err := w.Write([]byte(`{"message": "success"}`)); err != nil {
+			t.Fatalf("Failed to write response: %v", err)
+		}
 	}))
 	defer ts.Close()
 
