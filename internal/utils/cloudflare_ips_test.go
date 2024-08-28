@@ -23,7 +23,9 @@ func TestFetchCloudflareIPv4Ranges(t *testing.T) {
 	// Create a test server that returns the mock response
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(mockCloudflareResponse)
+		if err := json.NewEncoder(w).Encode(mockCloudflareResponse); err != nil {
+			t.Fatalf("Failed to encode mock response: %v", err)
+		}
 	}))
 	defer ts.Close()
 
@@ -65,7 +67,9 @@ func TestFetchCloudflareIPv4Ranges_InvalidJSON(t *testing.T) {
 	// Create a test server that returns invalid JSON
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`invalid json`))
+		if _, err := w.Write([]byte(`invalid json`)); err != nil {
+			t.Fatalf("Failed to write invalid JSON: %v", err)
+		}
 	}))
 	defer ts.Close()
 
