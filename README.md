@@ -1,9 +1,25 @@
 # devbriefs-news
 Devbriefs microservice about news
 
-# Go
+[//]: # (<img align="right" width="159px" src="https://raw.githubusercontent.com/gin-gonic/logo/master/color.png">)
 
-## News-Fetcher service
+[//]: # ([![Build Status]&#40;https://github.com/gin-gonic/gin/workflows/Run%20Tests/badge.svg?branch=master&#41;]&#40;https://github.com/semper-proficiens/devbriefs-news/actions?query=branch%3Amain+&#41;)
+
+[//]: # ([![codecov]&#40;https://codecov.io/gh/gin-gonic/gin/branch/master/graph/badge.svg&#41;]&#40;https://codecov.io/gh/gin-gonic/gin&#41;)
+
+[//]: # ([![Go Report Card]&#40;https://goreportcard.com/badge/github.com/gin-gonic/gin&#41;]&#40;https://goreportcard.com/report/github.com/gin-gonic/gin&#41;)
+
+[//]: # ([![Go Reference]&#40;https://pkg.go.dev/badge/github.com/gin-gonic/gin?status.svg&#41;]&#40;https://pkg.go.dev/github.com/gin-gonic/gin?tab=doc&#41;)
+
+[//]: # ([![Sourcegraph]&#40;https://sourcegraph.com/github.com/gin-gonic/gin/-/badge.svg&#41;]&#40;https://sourcegraph.com/github.com/gin-gonic/gin?badge&#41;)
+
+[//]: # ([![Open Source Helpers]&#40;https://www.codetriage.com/gin-gonic/gin/badges/users.svg&#41;]&#40;https://www.codetriage.com/gin-gonic/gin&#41;)
+
+[//]: # ([![Release]&#40;https://img.shields.io/github/release/gin-gonic/gin.svg?style=flat-square&#41;]&#40;https://github.com/gin-gonic/gin/releases&#41;)
+
+[//]: # ([![TODOs]&#40;https://badgen.net/https/api.tickgit.com/badgen/github.com/gin-gonic/gin&#41;]&#40;https://www.tickgit.com/browse?repo=github.com/gin-gonic/gin&#41;)
+
+## DevBriefs News service
 
 Workflow:
 - `config`: app configuration
