@@ -7,7 +7,15 @@ import (
 
 // CalculateSimilarity calculates the similarity score between two strings using Levenshtein distance.
 func CalculateSimilarity(a, b string) float64 {
-	distance := levenshtein.DistanceForStrings([]rune(a), []rune(b), levenshtein.DefaultOptions)
+	options := levenshtein.Options{
+		InsCost: 1,
+		DelCost: 1,
+		SubCost: 1,
+		Matches: func(rune, rune) bool {
+			return rune == rune
+		},
+	}
+	distance := levenshtein.DistanceForStrings([]rune(a), []rune(b), options)
 	maxLen := maxInt(len(a), len(b))
 	fmt.Printf("a: %s, b: %s, distance: %d, maxLen: %d\n", a, b, distance, maxLen)
 	if maxLen == 0 {
