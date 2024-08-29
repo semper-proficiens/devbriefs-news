@@ -2,13 +2,14 @@ package handlers
 
 import (
 	"devbriefs-news/internal/models"
+	"encoding/json"
 	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 )
 
-// MockNewsService is a mock implementation of the NewsService interface.
+// MockNewsService is a mock implementation of the NewsServiceInterface.
 type MockNewsService struct {
 	FetchTopHeadlinesNewsFunc      func(keyword string) ([]models.NewsArticle, error)
 	FetchEverythingHackingNewsFunc func() ([]models.NewsArticle, error)
@@ -22,8 +23,8 @@ func (m *MockNewsService) FetchEverythingHackingNews() ([]models.NewsArticle, er
 	return m.FetchEverythingHackingNewsFunc()
 }
 
-// TestGetTopHeadlinesNewsSuccess tests the GetTopHeadlinesNews method for a successful response.
-func TestGetTopHeadlinesNewsSuccess(t *testing.T) {
+// TestGetTopHeadlinesNews_Success tests the GetTopHeadlinesNews method for a successful response.
+func TestGetTopHeadlinesNews_Success(t *testing.T) {
 	mockService := &MockNewsService{
 		FetchTopHeadlinesNewsFunc: func(keyword string) ([]models.NewsArticle, error) {
 			return []models.NewsArticle{
@@ -46,9 +47,18 @@ func TestGetTopHeadlinesNewsSuccess(t *testing.T) {
 		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
 	}
 
-	expected := `[{"Title":"Article 1","URL":"http://example.com/1"},{"Title":"Article 2","URL":"http://example.com/2"}]`
-	if rr.Body.String() != expected {
-		t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), expected)
+	var actual []models.NewsArticle
+	if err := json.Unmarshal(rr.Body.Bytes(), &actual); err != nil {
+		t.Fatalf("Failed to unmarshal response body: %v", err)
+	}
+
+	expected := []models.NewsArticle{
+		{Title: "Article 1", URL: "http://example.com/1"},
+		{Title: "Article 2", URL: "http://example.com/2"},
+	}
+
+	if !equalArticles(actual, expected) {
+		t.Errorf("handler returned unexpected body: got %v want %v", actual, expected)
 	}
 }
 
@@ -103,9 +113,18 @@ func TestGetEverythingHackingNews_Success(t *testing.T) {
 		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
 	}
 
-	expected := `[{"Title":"Article 1","URL":"http://example.com/1"},{"Title":"Article 2","URL":"http://example.com/2"}]`
-	if rr.Body.String() != expected {
-		t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), expected)
+	var actual []models.NewsArticle
+	if err := json.Unmarshal(rr.Body.Bytes(), &actual); err != nil {
+		t.Fatalf("Failed to unmarshal response body: %v", err)
+	}
+
+	expected := []models.NewsArticle{
+		{Title: "Article 1", URL: "http://example.com/1"},
+		{Title: "Article 2", URL: "http://example.com/2"},
+	}
+
+	if !equalArticles(actual, expected) {
+		t.Errorf("handler returned unexpected body: got %v want %v", actual, expected)
 	}
 }
 
@@ -134,4 +153,17 @@ func TestGetEverythingHackingNews_Error(t *testing.T) {
 	if rr.Body.String() != expected {
 		t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), expected)
 	}
+}
+
+// equalArticles compares two slices of NewsArticle for equality.
+func equalArticles(a, b []models.NewsArticle) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
 }

@@ -9,8 +9,14 @@ import (
 func TestLoadConfigValue(t *testing.T) {
 	// Set the environment variable
 	expectedAPIKey := "test-api-key"
-	os.Setenv("NEWSFETCHER_GOOGLE_API_KEY", expectedAPIKey)
-	defer os.Unsetenv("NEWSFETCHER_GOOGLE_API_KEY")
+	if err := os.Setenv("NEWSFETCHER_GOOGLE_API_KEY", expectedAPIKey); err != nil {
+		t.Fatalf("Failed to set environment variable: %v", err)
+	}
+	defer func() {
+		if err := os.Unsetenv("NEWSFETCHER_GOOGLE_API_KEY"); err != nil {
+			t.Fatalf("Failed to unset environment variable: %v", err)
+		}
+	}()
 
 	// Call the LoadConfig function
 	config, err := LoadConfig()
@@ -27,7 +33,11 @@ func TestLoadConfigValue(t *testing.T) {
 // TestLoadConfigIsMissing tests the LoadConfig function when the environment variable is not set.
 func TestLoadConfigIsMissing(t *testing.T) {
 	// Unset the environment variable
-	os.Unsetenv("NEWSFETCHER_GOOGLE_API_KEY")
+	defer func() {
+		if err := os.Unsetenv("NEWSFETCHER_GOOGLE_API_KEY"); err != nil {
+			t.Fatalf("Failed to unset environment variable: %v", err)
+		}
+	}()
 
 	// Call the LoadConfig function
 	_, err := LoadConfig()

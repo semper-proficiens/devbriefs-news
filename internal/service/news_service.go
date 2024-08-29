@@ -6,6 +6,12 @@ import (
 	"devbriefs-news/internal/models"
 )
 
+// NewsServiceInterface defines the methods that the NewsService should implement.
+type NewsServiceInterface interface {
+	FetchTopHeadlinesNews(keyword string) ([]models.NewsArticle, error)
+	FetchEverythingHackingNews() ([]models.NewsArticle, error)
+}
+
 type NewsService struct {
 	newsAPI api.GoogleNewsAPIInterface
 }
