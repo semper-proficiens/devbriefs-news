@@ -13,21 +13,21 @@ import (
 
 const (
 	hackingQuery = `
-	"data breach" OR 
-	"hacker" OR 
-	"hackers" OR 
-	"hacked" OR 
-	"malware" OR 
-	"exploited vulnerability"
-	-"how to"
-	-"your"
-	-"you"
-	-"my"
-	`
+    "data breach" OR 
+    "hacker" OR 
+    "hackers" OR 
+    "hacked" OR 
+    "malware" OR 
+    "exploited vulnerability"
+    -"how to"
+    -"your"
+    -"you"
+    -"my"
+    `
 	newsLanguage        = "en"
 	newsExcludedDomains = `
-	daemonology.net
-	`
+    daemonology.net
+    `
 	//only root domains, not fqdn (e.g. talosintelligence.com vs blog.talosintelligence.com)
 	newsDomains  = "thehackernews.com,hackread.com,talosintelligence.com,bleepingcomputer.com,cisa.gov,csoonline.com,threatpost.com,krebsonsecurity.com,wired.com,zdnet.com,virtualattacks.com"
 	newsSortBy   = "publishedAt" // options: "relevancy" to q, "publishedAt" for newest (default)
@@ -36,50 +36,21 @@ const (
 
 // GoogleNewsAPIInterface defines the methods that the GoogleNewsAPI should implement.
 type GoogleNewsAPIInterface interface {
-	FetchTopHeadlinesNews(keyword string) ([]models.NewsArticle, error)
 	FetchEverythingHacking() ([]models.NewsArticle, error)
 }
 
 type GoogleNewsAPI struct {
 	APIKey         string
 	GetHTTPRequest func(url string) (*http.Response, error)
+	URLParse       func(rawURL string) (*url.URL, error)
 }
 
 func NewGoogleNewsAPI(apiKey string) *GoogleNewsAPI {
 	return &GoogleNewsAPI{
 		APIKey:         apiKey,
 		GetHTTPRequest: utils.MakeSecureGetHTTPRequest,
+		URLParse:       url.Parse,
 	}
-}
-
-func (api *GoogleNewsAPI) FetchTopHeadlinesNews(keyword string) ([]models.NewsArticle, error) {
-	// hardcoding 'technology' because that's our main interest
-	// we're using the 'top-headlines' path instead of 'everything' because it allows us to query further by country, category, etc.
-	// news are sort by 'earliest date' from the api using above path
-	// Official doc https://newsapi.org/docs/endpoints/everything
-	topHeadlinesUrl := fmt.Sprintf("https://newsapi.org/v2/top-headlines?country=us&category=technology&q=%s&apiKey=%s", keyword, api.APIKey)
-	resp, err := api.GetHTTPRequest(topHeadlinesUrl)
-	if err != nil {
-		log.Printf("Error making http get request: %s", err)
-		return nil, err
-	}
-	defer func() {
-		if err = resp.Body.Close(); err != nil {
-			log.Printf("failed to close response body: %v", err)
-		}
-	}()
-
-	var result struct {
-		Articles []models.NewsArticle `json:"articles"`
-	}
-	if err = json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		log.Printf("Error decoding json: %s", err)
-		return nil, err
-	}
-
-	//log.Printf("Article Response: %s", result.Articles)
-
-	return result.Articles, nil
 }
 
 // FetchEverythingHacking queries the News API 'everything' endpoint searching for hacking keywords
@@ -97,7 +68,7 @@ func (api *GoogleNewsAPI) fetchEverythingNews(query string) ([]models.NewsArticl
 		return nil, fmt.Errorf("encoded query exceeds the maximum length of 500 characters")
 	}
 
-	baseURL, err := url.Parse("https://newsapi.org/v2/everything")
+	baseURL, err := api.URLParse("https://newsapi.org/v2/everything")
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse base URL: %v", err)
 	}
@@ -160,7 +131,7 @@ func removeDuplicateTitles(articles []models.NewsArticle, threshold float64) []m
 		for j := 0; j < i; j++ {
 			similarity := utils.CalculateSimilarity(article.Title, articles[j].Title)
 			if similarity >= threshold {
-				log.Printf("Excluded potential duplicate news \"%s\" and \"%s\" with similarity score %2f", article.Title, articles[j].Title, similarity)
+				log.Printf("Excluded potential duplicate news \"%s\" and \"%s\" with similarity score %.2f", article.Title, articles[j].Title, similarity)
 				isDuplicate = true
 				break
 			}

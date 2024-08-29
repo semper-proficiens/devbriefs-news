@@ -9,12 +9,7 @@ import (
 
 // MockGoogleNewsAPI is a mock implementation of the GoogleNewsAPI interface.
 type MockGoogleNewsAPI struct {
-	FetchTopHeadlinesNewsFunc  func(keyword string) ([]models.NewsArticle, error)
 	FetchEverythingHackingFunc func() ([]models.NewsArticle, error)
-}
-
-func (m *MockGoogleNewsAPI) FetchTopHeadlinesNews(keyword string) ([]models.NewsArticle, error) {
-	return m.FetchTopHeadlinesNewsFunc(keyword)
 }
 
 func (m *MockGoogleNewsAPI) FetchEverythingHacking() ([]models.NewsArticle, error) {
@@ -30,55 +25,6 @@ func TestNewNewsService(t *testing.T) {
 
 	if service.newsAPI == nil {
 		t.Error("Expected newsAPI to be non-nil")
-	}
-}
-
-// TestFetchTopHeadlinesNews_Success tests the FetchTopHeadlinesNews method for a successful response.
-func TestFetchTopHeadlinesNews_Success(t *testing.T) {
-	mockAPI := &MockGoogleNewsAPI{
-		FetchTopHeadlinesNewsFunc: func(keyword string) ([]models.NewsArticle, error) {
-			return []models.NewsArticle{
-				{Title: "Article 1", URL: "http://example.com/1"},
-				{Title: "Article 2", URL: "http://example.com/2"},
-			}, nil
-		},
-	}
-	service := &NewsService{newsAPI: mockAPI}
-
-	articles, err := service.FetchTopHeadlinesNews("test")
-	if err != nil {
-		t.Fatalf("Expected no error, got %v", err)
-	}
-
-	if len(articles) != 2 {
-		t.Fatalf("Expected 2 articles, got %d", len(articles))
-	}
-
-	expectedTitles := []string{"Article 1", "Article 2"}
-	for i, article := range articles {
-		if article.Title != expectedTitles[i] {
-			t.Errorf("Expected title %s, got %s", expectedTitles[i], article.Title)
-		}
-	}
-}
-
-// TestFetchTopHeadlinesNews_Error tests the FetchTopHeadlinesNews method for an error response.
-func TestFetchTopHeadlinesNews_Error(t *testing.T) {
-	mockAPI := &MockGoogleNewsAPI{
-		FetchTopHeadlinesNewsFunc: func(keyword string) ([]models.NewsArticle, error) {
-			return nil, errors.New("test error")
-		},
-	}
-	service := &NewsService{newsAPI: mockAPI}
-
-	_, err := service.FetchTopHeadlinesNews("test")
-	if err == nil {
-		t.Fatal("Expected error, got nil")
-	}
-
-	expectedError := "test error"
-	if err.Error() != expectedError {
-		t.Errorf("Expected error message %s, got %s", expectedError, err.Error())
 	}
 }
 

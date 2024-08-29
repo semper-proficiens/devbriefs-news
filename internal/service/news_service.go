@@ -8,7 +8,6 @@ import (
 
 // NewsServiceInterface defines the methods that the NewsService should implement.
 type NewsServiceInterface interface {
-	FetchTopHeadlinesNews(keyword string) ([]models.NewsArticle, error)
 	FetchEverythingHackingNews() ([]models.NewsArticle, error)
 }
 
@@ -20,10 +19,6 @@ func NewNewsService(cfg *config.Config) *NewsService {
 	return &NewsService{
 		newsAPI: api.NewGoogleNewsAPI(cfg.GoogleAPIKey),
 	}
-}
-
-func (s *NewsService) FetchTopHeadlinesNews(keyword string) ([]models.NewsArticle, error) {
-	return s.newsAPI.FetchTopHeadlinesNews(keyword)
 }
 
 func (s *NewsService) FetchEverythingHackingNews() ([]models.NewsArticle, error) {

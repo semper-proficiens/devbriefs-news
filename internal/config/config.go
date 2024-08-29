@@ -1,7 +1,7 @@
 package config
 
 import (
-	"log"
+	"fmt"
 	"os"
 )
 
@@ -17,7 +17,7 @@ func LoadConfig() (*Config, error) {
 
 	// Check if the required environment variable is set
 	if googleAPIKey == "" {
-		log.Fatal("Environment variable NEWSFETCHER_GOOGLE_API_KEY is required but not set")
+		return nil, fmt.Errorf("environment variable NEWSFETCHER_GOOGLE_API_KEY is required but not set")
 	}
 
 	// Create a Config struct and populate it with values from environment variables
