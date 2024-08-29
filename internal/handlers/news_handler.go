@@ -7,10 +7,10 @@ import (
 )
 
 type NewsHandler struct {
-	newsService *service.NewsService
+	newsService service.NewsServiceInterface
 }
 
-func NewNewsHandler(newsService *service.NewsService) *NewsHandler {
+func NewNewsHandler(newsService service.NewsServiceInterface) *NewsHandler {
 	return &NewsHandler{newsService: newsService}
 }
 
