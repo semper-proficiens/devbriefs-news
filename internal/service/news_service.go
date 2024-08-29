@@ -7,7 +7,7 @@ import (
 )
 
 type NewsService struct {
-	newsAPI *api.GoogleNewsAPI
+	newsAPI api.GoogleNewsAPIInterface
 }
 
 func NewNewsService(cfg *config.Config) *NewsService {

@@ -34,6 +34,12 @@ const (
 	newsPageSize = "10"
 )
 
+// GoogleNewsAPIInterface defines the methods that the GoogleNewsAPI should implement.
+type GoogleNewsAPIInterface interface {
+	FetchTopHeadlinesNews(keyword string) ([]models.NewsArticle, error)
+	FetchEverythingHacking() ([]models.NewsArticle, error)
+}
+
 type GoogleNewsAPI struct {
 	APIKey         string
 	GetHTTPRequest func(url string) (*http.Response, error)
