@@ -1,5 +1,5 @@
 # devbriefs-news
-Devbriefs microservice about news
+Devbriefs is microservice about catered Engineering news
 
 [//]: # (<img align="right" width="159px" src="https://raw.githubusercontent.com/gin-gonic/logo/master/color.png">)
 
@@ -12,11 +12,7 @@ Devbriefs microservice about news
 
 [//]: # ([![Sourcegraph]&#40;https://sourcegraph.com/github.com/gin-gonic/gin/-/badge.svg&#41;]&#40;https://sourcegraph.com/github.com/gin-gonic/gin?badge&#41;)
 
-[//]: # ([![Open Source Helpers]&#40;https://www.codetriage.com/gin-gonic/gin/badges/users.svg&#41;]&#40;https://www.codetriage.com/gin-gonic/gin&#41;)
-
 [//]: # ([![Release]&#40;https://img.shields.io/github/release/gin-gonic/gin.svg?style=flat-square&#41;]&#40;https://github.com/gin-gonic/gin/releases&#41;)
-
-[//]: # ([![TODOs]&#40;https://badgen.net/https/api.tickgit.com/badgen/github.com/gin-gonic/gin&#41;]&#40;https://www.tickgit.com/browse?repo=github.com/gin-gonic/gin&#41;)
 
 ## DevBriefs News service
 

@@ -35,10 +35,6 @@ func main() {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 
-	// Define routes
-	r.GET("/api/top-headlines-news", func(c *gin.Context) {
-		newsHandler.GetTopHeadlinesNews(c.Writer, c.Request)
-	})
 	r.GET("/api/everything-hacking-news", func(c *gin.Context) {
 		newsHandler.GetEverythingHackingNews(c.Writer, c.Request)
 	})
