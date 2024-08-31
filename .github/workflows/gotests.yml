@@ -62,10 +62,9 @@ jobs:
     needs: gosec
     name: "Run CodeQL"
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        language: [ "go" ]
+    permissions:
+      # required for all workflows
+      security-events: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
