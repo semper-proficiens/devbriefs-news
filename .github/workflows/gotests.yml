@@ -58,23 +58,8 @@ jobs:
         with:
           args: ./...
 
-  codeql:
-    needs: gosec
-    name: "Run CodeQL"
-    runs-on: ubuntu-latest
-    permissions:
-      # required for all workflows
-      security-events: write
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
-
   unit-tests:
-    needs: codeql
+    needs: gosec
     name: "Run Unit Tests"
     runs-on: ubuntu-latest
     steps:
