@@ -59,7 +59,7 @@ jobs:
           args: ./...
 
   codeql:
-    need: gosec
+    needs: gosec
     name: "Run CodeQL"
     runs-on: ubuntu-latest
     strategy:
