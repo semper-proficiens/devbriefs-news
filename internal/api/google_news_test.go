@@ -6,7 +6,6 @@ import (
 	"errors"
 	"io"
 	"net/http"
-	"net/url"
 	"reflect"
 	"strings"
 	"testing"
@@ -26,7 +25,6 @@ func TestFetchEverythingHacking(t *testing.T) {
 		name           string
 		query          string
 		mockGetFunc    func(url string) (*http.Response, error)
-		mockURLParse   func(rawURL string) (*url.URL, error)
 		expectedResult []models.NewsArticle
 		expectedError  error
 	}{
@@ -44,9 +42,6 @@ func TestFetchEverythingHacking(t *testing.T) {
 					Body:       io.NopCloser(strings.NewReader(string(body))),
 				}, nil
 			},
-			mockURLParse: func(rawURL string) (*url.URL, error) {
-				return url.Parse(rawURL)
-			},
 			expectedResult: []models.NewsArticle{
 				{Title: "Test News 1"},
 			},
@@ -58,9 +53,6 @@ func TestFetchEverythingHacking(t *testing.T) {
 			mockGetFunc: func(url string) (*http.Response, error) {
 				return nil, nil
 			},
-			mockURLParse: func(rawURL string) (*url.URL, error) {
-				return nil, errors.New("url parse error")
-			},
 			expectedResult: nil,
 			expectedError:  errors.New("failed to parse base URL: url parse error"),
 		},
@@ -69,9 +61,6 @@ func TestFetchEverythingHacking(t *testing.T) {
 			query: hackingQuery,
 			mockGetFunc: func(url string) (*http.Response, error) {
 				return nil, errors.New("http request error")
-			},
-			mockURLParse: func(rawURL string) (*url.URL, error) {
-				return url.Parse(rawURL)
 			},
 			expectedResult: nil,
 			expectedError:  errors.New("http request error"),
@@ -85,9 +74,6 @@ func TestFetchEverythingHacking(t *testing.T) {
 					Body:       io.NopCloser(strings.NewReader("invalid json")),
 				}, nil
 			},
-			mockURLParse: func(rawURL string) (*url.URL, error) {
-				return url.Parse(rawURL)
-			},
 			expectedResult: nil,
 			expectedError:  errors.New("invalid character 'i' looking for beginning of value"),
 		},
@@ -96,9 +82,6 @@ func TestFetchEverythingHacking(t *testing.T) {
 			query: strings.Repeat("a", 501),
 			mockGetFunc: func(url string) (*http.Response, error) {
 				return nil, nil
-			},
-			mockURLParse: func(rawURL string) (*url.URL, error) {
-				return url.Parse(rawURL)
 			},
 			expectedResult: nil,
 			expectedError:  errors.New("encoded query exceeds the maximum length of 500 characters"),
@@ -114,7 +97,6 @@ func TestFetchEverythingHacking(t *testing.T) {
 			api := &GoogleNewsAPI{
 				APIKey:     "test-api-key",
 				HTTPClient: mockHTTPClient,
-				URLParse:   tt.mockURLParse,
 			}
 
 			result, err := api.fetchEverythingNews(tt.query)

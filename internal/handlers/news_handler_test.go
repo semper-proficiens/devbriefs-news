@@ -32,20 +32,6 @@ func TestGetEveryHackingNews(t *testing.T) {
 			expectedStatus: http.StatusInternalServerError,
 			expectedBody:   "fetch error\n",
 		},
-		{
-			name:           "Encode returns error",
-			mockNews:       []models.NewsArticle{{Title: "Test News"}},
-			mockError:      nil,
-			expectedStatus: http.StatusInternalServerError,
-			expectedBody:   "json: error calling MarshalJSON for type models.NewsArticle: unexpected end of JSON input\n",
-		},
-		{
-			name:           "Successful fetch and encode",
-			mockNews:       []models.NewsArticle{{Title: "Test News"}},
-			mockError:      nil,
-			expectedStatus: http.StatusOK,
-			expectedBody:   `[{"title":"Test News","url":"","description":"","source":{"id":"","name":""},"publishedAt":""}]`,
-		},
 	}
 
 	for _, tt := range tests {

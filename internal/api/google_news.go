@@ -2,10 +2,10 @@ package api
 
 import (
 	"devbriefs-news/internal/models"
-	"devbriefs-news/internal/utils"
-	"fmt"
+	"github.com/semper-proficiens/go-utils/nlp"
 	"github.com/semper-proficiens/go-utils/web/jsonhandler"
 	"github.com/semper-proficiens/go-utils/web/securehttp"
+	"github.com/semper-proficiens/go-utils/web/urlcleaner"
 	"log"
 	"net/url"
 	"time"
@@ -39,14 +39,12 @@ type NewsAPI interface {
 type GoogleNewsAPI struct {
 	APIKey     string
 	HTTPClient securehttp.CustomHTTPClientInterface
-	URLParse   func(rawURL string) (*url.URL, error)
 }
 
 func NewGoogleNewsAPI(apiKey string, sc *securehttp.CustomHTTPClient) (*GoogleNewsAPI, error) {
 	return &GoogleNewsAPI{
 		APIKey:     apiKey,
 		HTTPClient: sc,
-		URLParse:   url.Parse,
 	}, nil
 }
 
@@ -59,15 +57,9 @@ func (api *GoogleNewsAPI) FetchEverythingHacking() ([]models.NewsArticle, error)
 // a query argument with the query keywords filters to use.
 // Official doc https://newsapi.org/docs/endpoints/everything
 func (api *GoogleNewsAPI) fetchEverythingNews(query string) ([]models.NewsArticle, error) {
-	encodedQuery := url.QueryEscape(query)
-	// Check the length of the encoded query, max supported by api is 500 chars
-	if len(encodedQuery) > 500 {
-		return nil, fmt.Errorf("encoded query exceeds the maximum length of 500 characters")
-	}
-
-	baseURL, err := api.URLParse("https://newsapi.org/v2/everything")
+	baseURL, err := urlcleaner.UrlParser(query, "https://newsapi.org/v2/everything", 500)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse base URL: %v", err)
+		return nil, err
 	}
 
 	// get news from 1 week ago
@@ -89,6 +81,7 @@ func (api *GoogleNewsAPI) fetchEverythingNews(query string) ([]models.NewsArticl
 	// Add the query parameters to the URL
 	baseURL.RawQuery = params.Encode()
 
+	log.Println("[DEBUG] Going to make http request to API")
 	resp, err := api.HTTPClient.Get(baseURL.String())
 	if err != nil {
 		log.Printf("Error making http get request: %s", err)
@@ -102,6 +95,7 @@ func (api *GoogleNewsAPI) fetchEverythingNews(query string) ([]models.NewsArticl
 		}
 	}()
 
+	log.Println("[DEBUG] Completed http request to API")
 	// let's unmarshal that response from API
 	var result struct {
 		Articles []models.NewsArticle `json:"articles"`
@@ -111,32 +105,11 @@ func (api *GoogleNewsAPI) fetchEverythingNews(query string) ([]models.NewsArticl
 		return nil, err
 	}
 
-	// let's trim the response with some additional logic
-	uniqueArticles := removeDuplicateTitles(result.Articles, 0.6)
+	uniqueArticles := nlp.RemoveDuplicates(result.Articles, 0.6, "Title")
 
-	//for _, ua := range uniqueArticles {
-	//	log.Printf("Title: %s, URL: %s, Date: %s", ua.Title, ua.URL, ua.PublishedAt)
-	//}
+	for _, ua := range uniqueArticles {
+		log.Printf("Title: %s, URL: %s, Date: %s", ua.Title, ua.URL, ua.PublishedAt)
+	}
 
 	return uniqueArticles, nil
-}
-
-// removeDuplicateTitles removes duplicate titles based on a similarity threshold.
-func removeDuplicateTitles(articles []models.NewsArticle, threshold float64) []models.NewsArticle {
-	var uniqueArticles []models.NewsArticle
-	for i, article := range articles {
-		isDuplicate := false
-		for j := 0; j < i; j++ {
-			similarity := utils.CalculateSimilarity(article.Title, articles[j].Title)
-			if similarity >= threshold {
-				log.Printf("Excluded potential duplicate news \"%s\" and \"%s\" with similarity score %.2f", article.Title, articles[j].Title, similarity)
-				isDuplicate = true
-				break
-			}
-		}
-		if !isDuplicate {
-			uniqueArticles = append(uniqueArticles, article)
-		}
-	}
-	return uniqueArticles
 }
