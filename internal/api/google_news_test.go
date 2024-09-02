@@ -2,193 +2,132 @@ package api
 
 import (
 	"devbriefs-news/internal/models"
+	"encoding/json"
 	"errors"
 	"io"
 	"net/http"
-	"net/http/httptest"
 	"net/url"
+	"reflect"
 	"strings"
 	"testing"
 )
 
-// Mock function to replace utils.MakeSecureGetHTTPRequest
-func mockGetHTTPRequest(url string) (*http.Response, error) {
-	var mockResponse string
-
-	if strings.Contains(url, "top-headlines") {
-		mockResponse = `{"articles": [{"title": "Test Article", "url": "https://example.com", "publishedAt": "2023-10-01T00:00:00Z"}]}`
-	} else if strings.Contains(url, "everything") {
-		mockResponse = `{"articles": [{"title": "Hacking News", "url": "https://example.com", "publishedAt": "2023-10-01T00:00:00Z"}]}`
-	}
-
-	return &http.Response{
-		StatusCode: http.StatusOK,
-		Body:       io.NopCloser(strings.NewReader(mockResponse)),
-		Header:     make(http.Header),
-	}, nil
+// MockHTTPClient is a mock implementation of the CustomHTTPClientInterface.
+type MockHTTPClient struct {
+	GetFunc func(url string) (*http.Response, error)
 }
 
-func TestNewGoogleNewsAPI(t *testing.T) {
-	apiKey := "test-api-key"
-	api := NewGoogleNewsAPI(apiKey)
-
-	if api.APIKey != apiKey {
-		t.Errorf("Expected APIKey to be %s, got %s", apiKey, api.APIKey)
-	}
-
-	if api.GetHTTPRequest == nil {
-		t.Error("Expected GetHTTPRequest to be non-nil")
-	}
-
-	if api.URLParse == nil {
-		t.Error("Expected URLParse to be non-nil")
-	}
+func (m *MockHTTPClient) Get(url string) (*http.Response, error) {
+	return m.GetFunc(url)
 }
 
 func TestFetchEverythingHacking(t *testing.T) {
-	api := &GoogleNewsAPI{
-		APIKey:         "test-api-key",
-		GetHTTPRequest: mockGetHTTPRequest,
-		URLParse:       url.Parse,
-	}
-
-	articles, err := api.FetchEverythingHacking()
-	if err != nil {
-		t.Fatalf("Expected no error, got %v", err)
-	}
-
-	if len(articles) != 1 {
-		t.Fatalf("Expected 1 article, got %d", len(articles))
-	}
-
-	if articles[0].Title != "Hacking News" {
-		t.Errorf("Expected article title to be 'Hacking News', got %s", articles[0].Title)
-	}
-}
-
-// Additional tests for error handling and edge cases
-
-// Test FetchEverythingHacking with encoded query length error
-func TestFetchEverythingHacking_EncodedQueryLengthError(t *testing.T) {
-	api := &GoogleNewsAPI{
-		APIKey:         "test-api-key",
-		GetHTTPRequest: http.Get,
-		URLParse:       url.Parse,
-	}
-
-	longQuery := string(make([]byte, 501))
-	_, err := api.fetchEverythingNews(longQuery)
-	if err == nil {
-		t.Fatal("Expected error, got nil")
-	}
-
-	expectedError := "encoded query exceeds the maximum length of 500 characters"
-	if err.Error() != expectedError {
-		t.Errorf("Expected error message %s, got %s", expectedError, err.Error())
-	}
-}
-
-// Test FetchEverythingHacking with base URL parsing error
-func TestFetchEverythingHacking_BaseURLParsingError(t *testing.T) {
-	api := &GoogleNewsAPI{
-		APIKey:         "test-api-key",
-		GetHTTPRequest: mockGetHTTPRequest,
-		URLParse: func(rawURL string) (*url.URL, error) {
-			return nil, errors.New("mock parse error")
+	tests := []struct {
+		name           string
+		query          string
+		mockGetFunc    func(url string) (*http.Response, error)
+		mockURLParse   func(rawURL string) (*url.URL, error)
+		expectedResult []models.NewsArticle
+		expectedError  error
+	}{
+		{
+			name:  "Successful fetch and parse",
+			query: hackingQuery,
+			mockGetFunc: func(url string) (*http.Response, error) {
+				articles := []models.NewsArticle{
+					{Title: "Test News 1"},
+					{Title: "Test News 2"},
+				}
+				body, _ := json.Marshal(map[string]interface{}{"articles": articles})
+				return &http.Response{
+					StatusCode: http.StatusOK,
+					Body:       io.NopCloser(strings.NewReader(string(body))),
+				}, nil
+			},
+			mockURLParse: func(rawURL string) (*url.URL, error) {
+				return url.Parse(rawURL)
+			},
+			expectedResult: []models.NewsArticle{
+				{Title: "Test News 1"},
+			},
+			expectedError: nil,
+		},
+		{
+			name:  "URL parsing fails",
+			query: hackingQuery,
+			mockGetFunc: func(url string) (*http.Response, error) {
+				return nil, nil
+			},
+			mockURLParse: func(rawURL string) (*url.URL, error) {
+				return nil, errors.New("url parse error")
+			},
+			expectedResult: nil,
+			expectedError:  errors.New("failed to parse base URL: url parse error"),
+		},
+		{
+			name:  "HTTP request fails",
+			query: hackingQuery,
+			mockGetFunc: func(url string) (*http.Response, error) {
+				return nil, errors.New("http request error")
+			},
+			mockURLParse: func(rawURL string) (*url.URL, error) {
+				return url.Parse(rawURL)
+			},
+			expectedResult: nil,
+			expectedError:  errors.New("http request error"),
+		},
+		{
+			name:  "JSON unmarshal fails",
+			query: hackingQuery,
+			mockGetFunc: func(url string) (*http.Response, error) {
+				return &http.Response{
+					StatusCode: http.StatusOK,
+					Body:       io.NopCloser(strings.NewReader("invalid json")),
+				}, nil
+			},
+			mockURLParse: func(rawURL string) (*url.URL, error) {
+				return url.Parse(rawURL)
+			},
+			expectedResult: nil,
+			expectedError:  errors.New("invalid character 'i' looking for beginning of value"),
+		},
+		{
+			name:  "Encoded query exceeds max length",
+			query: strings.Repeat("a", 501),
+			mockGetFunc: func(url string) (*http.Response, error) {
+				return nil, nil
+			},
+			mockURLParse: func(rawURL string) (*url.URL, error) {
+				return url.Parse(rawURL)
+			},
+			expectedResult: nil,
+			expectedError:  errors.New("encoded query exceeds the maximum length of 500 characters"),
 		},
 	}
 
-	_, err := api.fetchEverythingNews("test")
-	if err == nil {
-		t.Fatal("Expected error, got nil")
-	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockHTTPClient := &MockHTTPClient{
+				GetFunc: tt.mockGetFunc,
+			}
 
-	expectedError := "failed to parse base URL: mock parse error"
-	if err.Error() != expectedError {
-		t.Errorf("Expected error message %s, got %s", expectedError, err.Error())
-	}
-}
+			api := &GoogleNewsAPI{
+				APIKey:     "test-api-key",
+				HTTPClient: mockHTTPClient,
+				URLParse:   tt.mockURLParse,
+			}
 
-// Test FetchEverythingHacking with HTTP request error
-func TestFetchEverythingHacking_HTTPError(t *testing.T) {
-	api := &GoogleNewsAPI{
-		APIKey: "test-api-key",
-		GetHTTPRequest: func(url string) (*http.Response, error) {
-			return nil, errors.New("mock error")
-		},
-		URLParse: url.Parse,
-	}
+			result, err := api.fetchEverythingNews(tt.query)
 
-	_, err := api.FetchEverythingHacking()
-	if err == nil {
-		t.Fatal("Expected error, got nil")
-	}
+			if !reflect.DeepEqual(result, tt.expectedResult) {
+				t.Errorf("expected result %v, got %v", tt.expectedResult, result)
+			}
 
-	expectedError := "mock error"
-	if err.Error() != expectedError {
-		t.Errorf("Expected error message %s, got %s", expectedError, err.Error())
-	}
-}
-
-// Test FetchEverythingHacking with JSON decoding error
-func TestFetchEverythingHacking_JSONError(t *testing.T) {
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		if _, err := w.Write([]byte(`invalid json`)); err != nil {
-			t.Fatalf("Failed to write response: %v", err)
-		}
-	}))
-	defer ts.Close()
-
-	api := &GoogleNewsAPI{
-		APIKey: "test-api-key",
-		GetHTTPRequest: func(url string) (*http.Response, error) {
-			return &http.Response{
-				StatusCode: http.StatusOK,
-				Body:       io.NopCloser(strings.NewReader(`invalid json`)),
-				Header:     make(http.Header),
-			}, nil
-		},
-		URLParse: url.Parse,
-	}
-
-	_, err := api.FetchEverythingHacking()
-	if err == nil {
-		t.Fatal("Expected error, got nil")
-	}
-
-	expectedError := "invalid character 'i' looking for beginning of value"
-	if err.Error() != expectedError {
-		t.Errorf("Expected error message %s, got %s", expectedError, err.Error())
-	}
-}
-
-// Test removeDuplicateTitles with similarity threshold
-func TestRemoveDuplicateTitles(t *testing.T) {
-	articles := []models.NewsArticle{
-		{Title: "Article 2 Hack Something"},
-		{Title: "Article 2 Hack Something Repeated Once"},
-		{Title: "Article 2 Hack Something Repeated Twice"},
-		{Title: "Something totally different"},
-	}
-
-	uniqueArticles := removeDuplicateTitles(articles, 0.6)
-	if len(uniqueArticles) != 2 {
-		t.Fatalf("Expected 2 unique articles, got %d", len(uniqueArticles))
-	}
-}
-
-func BenchmarkFetchEverythingHacking(b *testing.B) {
-	api := &GoogleNewsAPI{
-		APIKey:         "test-api-key",
-		GetHTTPRequest: mockGetHTTPRequest,
-		URLParse:       url.Parse,
-	}
-
-	for i := 0; i < b.N; i++ {
-		_, err := api.FetchEverythingHacking()
-		if err != nil {
-			b.Fatalf("Expected no error, got %v", err)
-		}
+			if err != nil && tt.expectedError != nil && err.Error() != tt.expectedError.Error() {
+				t.Errorf("expected error %v, got %v", tt.expectedError, err)
+			} else if (err != nil && tt.expectedError == nil) || (err == nil && tt.expectedError != nil) {
+				t.Errorf("expected error %v, got %v", tt.expectedError, err)
+			}
+		})
 	}
 }

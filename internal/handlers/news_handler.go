@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func GetEveryHackingNews(w http.ResponseWriter, api *api.GoogleNewsAPI) {
+func GetEveryHackingNews(w http.ResponseWriter, api api.NewsAPI) {
 	news, err := api.FetchEverythingHacking()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

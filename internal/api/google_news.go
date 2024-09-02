@@ -31,6 +31,11 @@ const (
 	newsPageSize = "10"
 )
 
+// NewsAPI defines the interface for fetching news articles.
+type NewsAPI interface {
+	FetchEverythingHacking() ([]models.NewsArticle, error)
+}
+
 type GoogleNewsAPI struct {
 	APIKey     string
 	HTTPClient securehttp.CustomHTTPClientInterface
