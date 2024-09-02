@@ -1,9 +1,10 @@
 module devbriefs-news
 
-go 1.21.9
+go 1.23.0
 
 require (
 	github.com/gin-gonic/gin v1.10.0
+	github.com/semper-proficiens/go-utils v0.0.0-20240901234428-da58c63b4dcc
 	github.com/texttheater/golang-levenshtein/levenshtein v0.0.0-20200805054039-cae8b0eaed6c
 )
 

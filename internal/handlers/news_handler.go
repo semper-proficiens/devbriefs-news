@@ -1,21 +1,13 @@
 package handlers
 
 import (
-	"devbriefs-news/internal/service"
+	"devbriefs-news/internal/api"
 	"encoding/json"
 	"net/http"
 )
 
-type NewsHandler struct {
-	newsService service.NewsServiceInterface
-}
-
-func NewNewsHandler(newsService service.NewsServiceInterface) *NewsHandler {
-	return &NewsHandler{newsService: newsService}
-}
-
-func (h *NewsHandler) GetEverythingHackingNews(w http.ResponseWriter, r *http.Request) {
-	news, err := h.newsService.FetchEverythingHackingNews()
+func GetEveryHackingNews(w http.ResponseWriter, api *api.GoogleNewsAPI) {
+	news, err := api.FetchEverythingHacking()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
