@@ -1,17 +1,14 @@
 package main
 
 import (
-	"context"
 	"devbriefs-news/internal/api"
 	"devbriefs-news/internal/config"
 	"devbriefs-news/internal/handlers"
 	"devbriefs-news/internal/models"
+	"github.com/gin-gonic/gin"
 	"github.com/semper-proficiens/go-utils/web/jsonhandler"
 	"github.com/semper-proficiens/go-utils/web/securehttp"
 	"log"
-	"time"
-
-	"github.com/gin-gonic/gin"
 )
 
 const cloudFlareAPI = "https://api.cloudflare.com/client/v4/ips"
@@ -23,12 +20,8 @@ func main() {
 		log.Fatalf("Failed to load config: %v", err)
 	}
 
-	// define context
-	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
-	defer cancel()
-
 	// let's instantiate our custom secure client
-	sc, err := securehttp.NewSecureHTTPClient(ctx)
+	sc, err := securehttp.NewSecureHTTPClient()
 	if err != nil {
 		log.Fatalf("Failed to create secure http client: %v", err)
 	}

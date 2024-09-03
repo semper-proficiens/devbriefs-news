@@ -4,7 +4,7 @@ go 1.23.0
 
 require (
 	github.com/gin-gonic/gin v1.10.0
-	github.com/semper-proficiens/go-utils v0.0.0-20240902175127-5818d4eb75ff
+	github.com/semper-proficiens/go-utils v0.0.0-20240903024210-e027e2d5db48
 	github.com/texttheater/golang-levenshtein/levenshtein v0.0.0-20200805054039-cae8b0eaed6c
 )
 

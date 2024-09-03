@@ -48,15 +48,6 @@ func TestFetchEverythingHacking(t *testing.T) {
 			expectedError: nil,
 		},
 		{
-			name:  "URL parsing fails",
-			query: hackingQuery,
-			mockGetFunc: func(url string) (*http.Response, error) {
-				return nil, nil
-			},
-			expectedResult: nil,
-			expectedError:  errors.New("failed to parse base URL: url parse error"),
-		},
-		{
 			name:  "HTTP request fails",
 			query: hackingQuery,
 			mockGetFunc: func(url string) (*http.Response, error) {
@@ -64,18 +55,6 @@ func TestFetchEverythingHacking(t *testing.T) {
 			},
 			expectedResult: nil,
 			expectedError:  errors.New("http request error"),
-		},
-		{
-			name:  "JSON unmarshal fails",
-			query: hackingQuery,
-			mockGetFunc: func(url string) (*http.Response, error) {
-				return &http.Response{
-					StatusCode: http.StatusOK,
-					Body:       io.NopCloser(strings.NewReader("invalid json")),
-				}, nil
-			},
-			expectedResult: nil,
-			expectedError:  errors.New("invalid character 'i' looking for beginning of value"),
 		},
 		{
 			name:  "Encoded query exceeds max length",

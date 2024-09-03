@@ -81,7 +81,6 @@ func (api *GoogleNewsAPI) fetchEverythingNews(query string) ([]models.NewsArticl
 	// Add the query parameters to the URL
 	baseURL.RawQuery = params.Encode()
 
-	log.Println("[DEBUG] Going to make http request to API")
 	resp, err := api.HTTPClient.Get(baseURL.String())
 	if err != nil {
 		log.Printf("Error making http get request: %s", err)
