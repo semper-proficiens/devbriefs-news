@@ -2,11 +2,11 @@ package api
 
 import (
 	"devbriefs-news/internal/models"
-	"devbriefs-news/internal/utils"
-	"encoding/json"
-	"fmt"
+	"github.com/semper-proficiens/go-utils/nlp"
+	"github.com/semper-proficiens/go-utils/web/jsonhandler"
+	"github.com/semper-proficiens/go-utils/web/securehttp"
+	"github.com/semper-proficiens/go-utils/web/urlcleaner"
 	"log"
-	"net/http"
 	"net/url"
 	"time"
 )
@@ -24,33 +24,28 @@ const (
     -"you"
     -"my"
     `
-	newsLanguage        = "en"
-	newsExcludedDomains = `
-    daemonology.net
-    `
+	newsLanguage = "en"
 	//only root domains, not fqdn (e.g. talosintelligence.com vs blog.talosintelligence.com)
 	newsDomains  = "thehackernews.com,hackread.com,talosintelligence.com,bleepingcomputer.com,cisa.gov,csoonline.com,threatpost.com,krebsonsecurity.com,wired.com,zdnet.com,virtualattacks.com"
 	newsSortBy   = "publishedAt" // options: "relevancy" to q, "publishedAt" for newest (default)
 	newsPageSize = "10"
 )
 
-// GoogleNewsAPIInterface defines the methods that the GoogleNewsAPI should implement.
-type GoogleNewsAPIInterface interface {
+// NewsAPI defines the interface for fetching news articles.
+type NewsAPI interface {
 	FetchEverythingHacking() ([]models.NewsArticle, error)
 }
 
 type GoogleNewsAPI struct {
-	APIKey         string
-	GetHTTPRequest func(url string) (*http.Response, error)
-	URLParse       func(rawURL string) (*url.URL, error)
+	APIKey     string
+	HTTPClient securehttp.CustomHTTPClientInterface
 }
 
-func NewGoogleNewsAPI(apiKey string) *GoogleNewsAPI {
+func NewGoogleNewsAPI(apiKey string, sc *securehttp.CustomHTTPClient) (*GoogleNewsAPI, error) {
 	return &GoogleNewsAPI{
-		APIKey:         apiKey,
-		GetHTTPRequest: utils.MakeSecureGetHTTPRequest,
-		URLParse:       url.Parse,
-	}
+		APIKey:     apiKey,
+		HTTPClient: sc,
+	}, nil
 }
 
 // FetchEverythingHacking queries the News API 'everything' endpoint searching for hacking keywords
@@ -58,19 +53,13 @@ func (api *GoogleNewsAPI) FetchEverythingHacking() ([]models.NewsArticle, error)
 	return api.fetchEverythingNews(hackingQuery)
 }
 
-// fetchEverythingNews is the signature function used to hit the News API 'everything' endpoint. It expects
-// an argument with the query keywords to use.
+// fetchEverythingNews is a helper function used to hit the News API 'everything' endpoint. It expects
+// a query argument with the query keywords filters to use.
 // Official doc https://newsapi.org/docs/endpoints/everything
 func (api *GoogleNewsAPI) fetchEverythingNews(query string) ([]models.NewsArticle, error) {
-	encodedQuery := url.QueryEscape(query)
-	// Check the length of the encoded query, max supported by api is 500 chars
-	if len(encodedQuery) > 500 {
-		return nil, fmt.Errorf("encoded query exceeds the maximum length of 500 characters")
-	}
-
-	baseURL, err := api.URLParse("https://newsapi.org/v2/everything")
+	baseURL, err := urlcleaner.UrlParser(query, "https://newsapi.org/v2/everything", 500)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse base URL: %v", err)
+		return nil, err
 	}
 
 	// get news from 1 week ago
@@ -81,7 +70,6 @@ func (api *GoogleNewsAPI) fetchEverythingNews(query string) ([]models.NewsArticl
 	params := url.Values{}
 	params.Add("q", hackingQuery)
 	params.Add("searchin", "title")
-	params.Add("excludeDomains", newsExcludedDomains)
 	params.Add("language", newsLanguage)
 	params.Add("sortBy", newsSortBy)
 	params.Add("domains", newsDomains)
@@ -93,7 +81,7 @@ func (api *GoogleNewsAPI) fetchEverythingNews(query string) ([]models.NewsArticl
 	// Add the query parameters to the URL
 	baseURL.RawQuery = params.Encode()
 
-	resp, err := api.GetHTTPRequest(baseURL.String())
+	resp, err := api.HTTPClient.Get(baseURL.String())
 	if err != nil {
 		log.Printf("Error making http get request: %s", err)
 		return nil, err
@@ -106,39 +94,21 @@ func (api *GoogleNewsAPI) fetchEverythingNews(query string) ([]models.NewsArticl
 		}
 	}()
 
+	log.Println("[DEBUG] Completed http request to API")
+	// let's unmarshal that response from API
 	var result struct {
 		Articles []models.NewsArticle `json:"articles"`
 	}
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		log.Printf("Error decoding json: %s", err)
+	err = jsonhandler.UnmarshalJSONResponse(resp, &result)
+	if err != nil {
 		return nil, err
 	}
 
-	uniqueArticles := removeDuplicateTitles(result.Articles, 0.6)
+	uniqueArticles := nlp.RemoveDuplicates(result.Articles, 0.6, "Title")
 
-	//for _, ua := range uniqueArticles {
-	//	log.Printf("Title: %s, URL: %s, Date: %s", ua.Title, ua.URL, ua.PublishedAt)
-	//}
+	for _, ua := range uniqueArticles {
+		log.Printf("Title: %s, URL: %s, Date: %s", ua.Title, ua.URL, ua.PublishedAt)
+	}
 
 	return uniqueArticles, nil
-}
-
-// removeDuplicateTitles removes duplicate titles based on a similarity threshold.
-func removeDuplicateTitles(articles []models.NewsArticle, threshold float64) []models.NewsArticle {
-	var uniqueArticles []models.NewsArticle
-	for i, article := range articles {
-		isDuplicate := false
-		for j := 0; j < i; j++ {
-			similarity := utils.CalculateSimilarity(article.Title, articles[j].Title)
-			if similarity >= threshold {
-				log.Printf("Excluded potential duplicate news \"%s\" and \"%s\" with similarity score %.2f", article.Title, articles[j].Title, similarity)
-				isDuplicate = true
-				break
-			}
-		}
-		if !isDuplicate {
-			uniqueArticles = append(uniqueArticles, article)
-		}
-	}
-	return uniqueArticles
 }

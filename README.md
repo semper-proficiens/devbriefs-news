@@ -52,7 +52,7 @@ In our implementation that's the `internal/service` components.
 
 We can run our service locally like this:
 ```go
-NEWSFETCHER_GOOGLE_API_KEY=$apiKey go run cmd/news-fetcher/main.go
+NEWSFETCHER_GOOGLE_API_KEY=$apiKey go run cmd/main.go
 ```
 
 We can query the NewsAPI directly in simple curl like this:
