@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"devbriefs-news/internal/api"
 	"devbriefs-news/internal/config"
 	"devbriefs-news/internal/handlers"
@@ -36,8 +37,12 @@ func main() {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 
+	// start our main context
+	ctx := context.Background()
+
+	// let's add this on eroute here, if more route put in separate routing package
 	r.GET("/api/everything-hacking-news", func(c *gin.Context) {
-		handlers.GetEveryHackingNews(c.Writer, googleNewAPI)
+		handlers.GetEveryHackingNews(ctx, c.Writer, googleNewAPI)
 	})
 
 	// let's make sure we're always getting valid CloudFlare IPv4 addresses

@@ -44,22 +44,23 @@ jobs:
         with:
           version: "latest"
 
-  gosec:
-    needs: staticcheck
-    name: "Run Gosec Security Scanner"
-    runs-on: ubuntu-latest
-    env:
-      GO111MODULE: on
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Run Gosec Security Scanner
-        uses: securego/gosec@master
-        with:
-          args: ./...
+# removin gosec until their toolchain is on 1.23
+#  gosec:
+#    needs: staticcheck
+#    name: "Run Gosec Security Scanner"
+#    runs-on: ubuntu-latest
+#    env:
+#      GO111MODULE: on
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v4
+#      - name: Run Gosec Security Scanner
+#        uses: securego/gosec@master
+#        with:
+#          args: ./...
 
   unit-tests:
-    needs: gosec
+#    needs: gosec
     name: "Run Unit Tests"
     runs-on: ubuntu-latest
     steps:
@@ -70,7 +71,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.21.9'
+          go-version: 'stable'
       - name: Run tests, benchmarks, vet, and coverage report
         run: |
           go test -cover -coverprofile=coverage.out ./... && \
