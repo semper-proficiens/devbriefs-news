@@ -14,6 +14,8 @@ Overall Concept:
 - Every time someone hits an API endpoint, it fetches news and updates cache
 - There is a daily routine that run every day 6am EST, after executing it will sleep again until next day same time
 - All cached news will have a ttl of 24 hours
+- There is a unique check to only insert unique titles based on word similarity in the titles
+- The titles are hashed for uniqueness based on article title
 
 Repo Structure:
 - `api`: 3rd party apis
