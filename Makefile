@@ -7,3 +7,9 @@ tests: ## runs all tests and benchmarks with coverage
 	go vet ./...
 	golangci-lint run
 	gosec ./...
+
+build:
+	go build -o bin/news_api
+
+run: build
+	./bin/news_api
