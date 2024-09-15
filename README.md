@@ -6,53 +6,31 @@ Devbriefs is microservice about catered Engineering news
 [![Build Status](https://github.com/semper-proficiens/devbriefs-news/actions/workflows/gotests.yml/badge.svg)](https://github.com/semper-proficiens/devbriefs-news/actions?query=branch%3Amain+)
 [![codecov](https://codecov.io/github/semper-proficiens/devbriefs-news/branch/main/graph/badge.svg?token=75SCUZRRIP)](https://codecov.io/github/semper-proficiens/devbriefs-news)
 
-[//]: # ([![Go Report Card]&#40;https://goreportcard.com/badge/github.com/gin-gonic/gin&#41;]&#40;https://goreportcard.com/report/github.com/gin-gonic/gin&#41;)
-
-[//]: # ([![Go Reference]&#40;https://pkg.go.dev/badge/github.com/gin-gonic/gin?status.svg&#41;]&#40;https://pkg.go.dev/github.com/gin-gonic/gin?tab=doc&#41;)
-
-[//]: # ([![Sourcegraph]&#40;https://sourcegraph.com/github.com/gin-gonic/gin/-/badge.svg&#41;]&#40;https://sourcegraph.com/github.com/gin-gonic/gin?badge&#41;)
-
-[//]: # ([![Release]&#40;https://img.shields.io/github/release/gin-gonic/gin.svg?style=flat-square&#41;]&#40;https://github.com/gin-gonic/gin/releases&#41;)
-
 ## DevBriefs News service
 
-Workflow:
-- `config`: app configuration
-- `models`: how data will be structure to handle data from API
+Overall Concept:
+- We fetch news from a News API
+- To avoid making subsequent API calls and get the objects faster we cache the news
+- Every time someone hits an API endpoint, it fetches news and updates cache
+- There is a daily routine that run every day 6am EST, after executing it will sleep again until next day same time
+- All cached news will have a ttl of 24 hours
+- There is a unique check to only insert unique titles based on word similarity in the titles
+- The titles are hashed for uniqueness based on article title
+
+Repo Structure:
+- `api`: 3rd party apis
+- `datastore`: our backends and caches
 - `handlers`: all api handlers for our service
+- `models`: json models expected from certain 3rd party apis
 - `service`: business logic
-- `utils`: any tools we develop to help our components
-
-It uses the `gin` web framework.
-
-## Design Principles
-
-### Repository Pattern
-
-To separate the part of the application that deals with data (like fetching from API or DB) is separated from the
-rest of the application (business logic). We can test data logic and business logic separately and easier. But, the
-idea is that the data source (News API can be switched effortlessly).
-
-- e.g. For example, fetching news articles from an API
-
-In our implementation that's the `internal/api` components.
-
-### Service Layer Pattern
-
-To separate business logic from user interface and data code. Meant to reuse some parts of this logic in other `devbriefs`
-service components.
-
-- e.g. For example, deciding which news articles to fetch based on user input and ensuring all rules are followed
-
-In our implementation that's the `internal/service` components.
 
 # Testing
 
 ## Local simple test
 
-We can run our service locally like this:
+We can run our service locally like this (**needs to be a valid api key**):
 ```go
-NEWSFETCHER_GOOGLE_API_KEY=$apiKey go run cmd/main.go
+GOOGLE_NEWS_API_KEY=$apiKey go run main.go
 ```
 
 We can query the NewsAPI directly in simple curl like this:
@@ -91,7 +69,6 @@ To run local go tests, with benchmarks, coverage, lints, vets, and gosec:
     ```bash
     make golangci_run
     ```
-
 
 # TOIL
 
